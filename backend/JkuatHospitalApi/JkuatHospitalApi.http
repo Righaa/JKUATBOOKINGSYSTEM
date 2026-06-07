@@ -1,0 +1,16 @@
+@JkuatHospitalApi_HostAddress = http://localhost:5165
+
+GET {{JkuatHospitalApi_HostAddress}}/api/patients
+Accept: application/json
+
+###
+
+GET {{JkuatHospitalApi_HostAddress}}/api/doctors
+Accept: application/json
+
+###
+
+GET {{JkuatHospitalApi_HostAddress}}/api/appointments
+Accept: application/json
+
+###
