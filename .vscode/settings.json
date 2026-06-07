@@ -1,0 +1,15 @@
+{
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/node_modules": true,
+    "**/.dotnet": true
+  },
+  "search.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/node_modules": true,
+    "**/.dotnet": true
+  },
+  "dotnet.defaultSolution": "backend/Jkuat hospital backend.sln"
+}
