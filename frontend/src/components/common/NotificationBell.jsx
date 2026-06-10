@@ -54,7 +54,8 @@ function NotificationIcon({ type }) {
 }
 
 export default function NotificationBell() {
-  const { notifications, markNotificationRead } = useContext(NotificationContext);
+  const { notifications, markNotificationRead, removeNotification } =
+    useContext(NotificationContext);
   const [open, setOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const panelRef = useRef(null);
@@ -84,6 +85,11 @@ export default function NotificationBell() {
     if (!notification.read) {
       await markNotificationRead(notification.id);
     }
+  };
+
+  const handleDelete = async (event, id) => {
+    event.stopPropagation();
+    await removeNotification(id);
   };
 
   return (
@@ -134,26 +140,38 @@ export default function NotificationBell() {
                 const time = formatNotificationTime(n.createdAt, now);
 
                 return (
-                  <button
+                  <div
                     key={n.id}
-                    type="button"
                     className={`notification-item notification-item-${meta.type} ${
                       n.read ? "notification-item-read" : ""
                     }`}
-                    onClick={() => handleItemClick(n)}
                   >
-                    <span className={`notification-item-icon notification-icon-${meta.type}`}>
-                      <NotificationIcon type={meta.icon} />
-                    </span>
-                    <span className="notification-item-content">
-                      <span className="notification-item-label">{meta.label}</span>
-                      <span className="notification-item-message">
-                        {sanitizeNotificationMessage(n.message)}
+                    <button
+                      type="button"
+                      className="notification-item-main"
+                      onClick={() => handleItemClick(n)}
+                    >
+                      <span className={`notification-item-icon notification-icon-${meta.type}`}>
+                        <NotificationIcon type={meta.icon} />
                       </span>
-                      {time && <span className="notification-item-time">{time}</span>}
-                    </span>
-                    {!n.read && <span className="notification-unread-dot" />}
-                  </button>
+                      <span className="notification-item-content">
+                        <span className="notification-item-label">{meta.label}</span>
+                        <span className="notification-item-message">
+                          {sanitizeNotificationMessage(n.message)}
+                        </span>
+                        {time && <span className="notification-item-time">{time}</span>}
+                      </span>
+                      {!n.read && <span className="notification-unread-dot" />}
+                    </button>
+                    <button
+                      type="button"
+                      className="notification-dismiss-btn"
+                      onClick={(event) => handleDelete(event, n.id)}
+                      aria-label="Dismiss notification"
+                    >
+                      ×
+                    </button>
+                  </div>
                 );
               })
             )}

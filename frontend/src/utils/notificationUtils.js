@@ -28,6 +28,14 @@ export function getNotificationMeta(message) {
     };
   }
 
+  if (lower.includes("appointment reminder") || lower.includes("reminder:")) {
+    return {
+      type: "reminder",
+      label: "Appointment Reminder",
+      icon: "calendar",
+    };
+  }
+
   if (lower.includes("new appointment request")) {
     return {
       type: "request",
@@ -59,14 +67,34 @@ export function getNotificationMeta(message) {
   };
 }
 
-export function formatNotificationTime(createdAt, now = new Date()) {
-  if (!createdAt) return "";
+export function parseNotificationDate(createdAt) {
+  if (!createdAt) return null;
+
+  if (typeof createdAt === "string") {
+    const trimmed = createdAt.trim();
+    if (!trimmed) return null;
+
+    const hasTimezone =
+      trimmed.endsWith("Z") ||
+      /[+-]\d{2}:\d{2}$/.test(trimmed) ||
+      /[+-]\d{4}$/.test(trimmed);
+
+    const date = new Date(hasTimezone ? trimmed : `${trimmed}Z`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
   const date = new Date(createdAt);
-  if (Number.isNaN(date.getTime())) return "";
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function formatNotificationTime(createdAt, now = new Date()) {
+  const date = parseNotificationDate(createdAt);
+  if (!date) return "";
 
   const diffSec = Math.max(0, Math.floor((now - date) / 1000));
 
-  if (diffSec < 10) return "Just now";
+  if (diffSec < 1) return "Just now";
+  if (diffSec === 1) return "1 sec ago";
   if (diffSec < 60) return `${diffSec} secs ago`;
 
   const diffMins = Math.floor(diffSec / 60);

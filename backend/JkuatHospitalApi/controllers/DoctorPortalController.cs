@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using JkuatHospitalApi.Data;
 using JkuatHospitalApi.DTOs;
 using JkuatHospitalApi.Models;
@@ -36,6 +37,28 @@ namespace JkuatHospitalApi.Controllers
         private Task<bool> HasPatientRelationshipAsync(int doctorId, int patientId) =>
             context.Appointments.AnyAsync(a =>
                 a.DoctorId == doctorId && a.PatientId == patientId);
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+            var user = await context.Users.FindAsync(userId);
+
+            if (user == null || user.Role != "Doctor")
+                return NotFound();
+
+            if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+                return BadRequest(new { message = "Current password is incorrect" });
+
+            if (!Regex.IsMatch(dto.NewPassword,
+                @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?""':{}|<>_\-+=[\]\\;/']).{8,}$"))
+                return BadRequest(new { message = "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character" });
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            await context.SaveChangesAsync();
+
+            return Ok(new { message = "Password updated successfully" });
+        }
 
         [HttpGet("patients")]
         public async Task<IActionResult> GetPatients()
@@ -83,7 +106,7 @@ namespace JkuatHospitalApi.Controllers
                 return NotFound();
 
             var appointments = await context.Appointments
-                .Where(a => a.DoctorId == doctor.DoctorId && a.PatientId == patientId)
+                .Where(a => a.DoctorId == doctor.DoctorId && a.PatientId == patientId && a.Status != "Rejected")
                 .OrderByDescending(a => a.AppointmentDate)
                 .Select(a => new
                 {
@@ -173,7 +196,8 @@ namespace JkuatHospitalApi.Controllers
             await notifications.NotifyAllAsync(
                 $"Dr. {doctor.FullName} added a medical record for {patientName}: {record.Diagnosis}",
                 "MedicalRecordCreated",
-                new { recordId = record.Id, patientId = dto.PatientId });
+                new { recordId = record.Id, patientId = dto.PatientId },
+                dto.PatientId);
 
             return Ok(new
             {

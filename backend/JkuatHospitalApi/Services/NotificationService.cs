@@ -9,9 +9,18 @@ namespace JkuatHospitalApi.Services
         ApplicationDbContext context,
         IHubContext<NotificationHub> hub)
     {
-        public async Task NotifyAllAsync(string message, string? eventName = null, object? eventData = null)
+        public async Task NotifyAllAsync(
+            string message,
+            string? eventName = null,
+            object? eventData = null,
+            int? userId = null)
         {
-            context.Notifications.Add(new Notification { Message = message });
+            context.Notifications.Add(new Notification
+            {
+                Message = message,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+            });
             await context.SaveChangesAsync();
 
             await hub.Clients.All.SendAsync("ReceiveNotification", message);

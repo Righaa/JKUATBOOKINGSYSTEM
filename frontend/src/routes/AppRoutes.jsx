@@ -32,6 +32,10 @@ import AppointmentCalendar from "../pages/appointments/AppointmentCalendar";
 import AdminAppointments from "../pages/appointments/AdminAppointments";
 import DoctorAppointments from "../pages/appointments/DoctorAppointments";
 
+// Doctor Profile
+import DoctorProfile from "../pages/profile/DoctorProfile";
+import AdminProfile from "../pages/profile/AdminProfile";
+
 // Patient Profile
 import PatientProfile from "../pages/profile/PatientProfile";
 import PatientAppointments from "../pages/profile/PatientAppointments";
@@ -77,6 +81,17 @@ export default function AppRoutes() {
           <ProtectedRoute roles={["Admin"]}>
             <DashboardLayout>
               <AdminAppointments />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/profile"
+        element={
+          <ProtectedRoute roles={["Admin"]}>
+            <DashboardLayout>
+              <AdminProfile />
             </DashboardLayout>
           </ProtectedRoute>
         }
@@ -133,6 +148,17 @@ export default function AppRoutes() {
           <ProtectedRoute roles={["Doctor"]}>
             <DashboardLayout>
               <DoctorPatientDetail />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/doctor/profile"
+        element={
+          <ProtectedRoute roles={["Doctor"]}>
+            <DashboardLayout>
+              <DoctorProfile />
             </DashboardLayout>
           </ProtectedRoute>
         }

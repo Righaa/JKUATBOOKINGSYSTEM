@@ -66,17 +66,13 @@ export default function DoctorLogin() {
           name="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Default: Doctor@123"
+          placeholder="Enter your password"
           showPassword={showPassword}
           onToggleShow={() => setShowPassword((prev) => !prev)}
           variant="auth"
           autoComplete="current-password"
           required
         />
-
-        <p className="text-xs text-gray-500 mb-3">
-          First-time login uses the default password provided by admin.
-        </p>
 
         <button type="submit" disabled={loading} className="auth-submit">
           {loading ? "Signing in..." : "Doctor Login"}

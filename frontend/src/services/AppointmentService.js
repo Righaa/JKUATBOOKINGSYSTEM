@@ -29,10 +29,14 @@ export const approveAppointment = async (id) => {
   return await API.put(`/appointments/${id}/approve`);
 };
 
-export const rejectAppointment = async (id) => {
-  return await API.put(`/appointments/${id}/reject`);
+export const rejectAppointment = async (id, reason) => {
+  return await API.put(`/appointments/${id}/reject`, { reason });
 };
 
 export const cancelAppointment = async (id) => {
   return await API.put(`/appointments/${id}/cancel`);
+};
+
+export const completeAppointment = async (id) => {
+  return await API.put(`/appointments/${id}/complete`);
 };

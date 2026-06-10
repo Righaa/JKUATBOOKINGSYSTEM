@@ -3,6 +3,7 @@ using System.Text;
 using JkuatHospitalApi.Data;
 using JkuatHospitalApi.Hubs;
 using JkuatHospitalApi.Services;
+using JkuatHospitalApi.Services.Sms;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -22,10 +23,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddSignalR();
 
+builder.Services.Configure<SmsSettings>(builder.Configuration.GetSection("Sms"));
+builder.Services.AddHttpClient("Twilio");
+
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<DoctorAccountService>();
 builder.Services.AddScoped<AdminSeedService>();
+builder.Services.AddScoped<AppointmentReminderService>();
+builder.Services.AddSingleton<ISmsService, TwilioSmsService>();
+builder.Services.AddHostedService<AppointmentReminderHostedService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -69,8 +76,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
+            var origins = builder.Configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>() ?? ["http://localhost:5173"];
+
             policy
-                .WithOrigins("http://localhost:5173", "http://localhost:5174")
+                .WithOrigins(origins)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();

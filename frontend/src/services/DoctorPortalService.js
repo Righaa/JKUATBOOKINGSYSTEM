@@ -20,6 +20,10 @@ export const updateMedicalRecord = async (id, data) => {
   return await API.put(`/doctor-portal/records/${id}`, data);
 };
 
+export const changeDoctorPassword = async (data) => {
+  return await API.put("/doctor-portal/change-password", data);
+};
+
 export const doctorLogin = async (doctorId, password) => {
   return await API.post("/auth/doctor-login", { doctorId: Number(doctorId), password });
 };

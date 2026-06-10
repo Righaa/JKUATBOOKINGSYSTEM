@@ -10,5 +10,6 @@ backend/**/.keys/
 .env
 .env.*
 **/appsettings.Development.json
+backend/JkuatHospitalApi/appsettings.Development.json
 .DS_Store
 Thumbs.db

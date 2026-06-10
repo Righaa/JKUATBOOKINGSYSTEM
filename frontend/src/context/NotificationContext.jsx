@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { getNotifications, markAsRead } from "../services/NotificationService";
+import { getNotifications, markAsRead, deleteNotification } from "../services/NotificationService";
 import { AuthContext } from "./AuthContext";
 import connection from "../realtime/SignalR";
 
@@ -31,6 +31,15 @@ export const NotificationProvider = ({ children }) => {
     }
   }, []);
 
+  const removeNotification = useCallback(async (id) => {
+    try {
+      await deleteNotification(id);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    } catch {
+      // Ignore delete failures silently
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) {
       setNotifications([]);
@@ -47,7 +56,9 @@ export const NotificationProvider = ({ children }) => {
     connection.on("AppointmentApproved", refresh);
     connection.on("AppointmentRejected", refresh);
     connection.on("AppointmentCancelled", refresh);
+    connection.on("AppointmentCompleted", refresh);
     connection.on("MedicalRecordCreated", refresh);
+    connection.on("AppointmentReminder", refresh);
 
     return () => {
       clearInterval(interval);
@@ -56,13 +67,15 @@ export const NotificationProvider = ({ children }) => {
       connection.off("AppointmentApproved", refresh);
       connection.off("AppointmentRejected", refresh);
       connection.off("AppointmentCancelled", refresh);
+      connection.off("AppointmentCompleted", refresh);
       connection.off("MedicalRecordCreated", refresh);
+      connection.off("AppointmentReminder", refresh);
     };
   }, [user, fetchNotifications]);
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, setNotifications, fetchNotifications, markNotificationRead }}
+      value={{ notifications, setNotifications, fetchNotifications, markNotificationRead, removeNotification }}
     >
       {children}
     </NotificationContext.Provider>

@@ -21,6 +21,7 @@ export function mapAppointment(appointment) {
     appointmentDate: appointment.appointmentDate,
     status: appointment.status,
     reason: appointment.reason || "",
+    rejectionReason: appointment.rejectionReason || "",
   };
 }
 

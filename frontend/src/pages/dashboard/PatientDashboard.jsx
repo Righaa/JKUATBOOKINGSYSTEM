@@ -19,12 +19,12 @@ import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const STATUS_COLORS = {
   Pending: "#f59e0b",
-  Approved: "#16a34a",
+  Approved: "#1a7a45",
   Rejected: "#dc2626",
   Cancelled: "#64748b",
 };
 
-const PIE_COLORS = ["#2563eb", "#7c3aed", "#0891b2", "#ea580c", "#16a34a", "#db2777"];
+const PIE_COLORS = ["#6366f1", "#7c3aed", "#2563eb", "#a78bfa", "#1a7a45", "#c9a227"];
 
 export default function PatientDashboard() {
   const [appointments, setAppointments] = useState([]);
@@ -91,7 +91,7 @@ export default function PatientDashboard() {
                 <Tooltip />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                   {statusChartData.map((entry) => (
-                    <Cell key={entry.status} fill={STATUS_COLORS[entry.status] ?? "#2563eb"} />
+                    <Cell key={entry.status} fill={STATUS_COLORS[entry.status] ?? "#6366f1"} />
                   ))}
                 </Bar>
               </BarChart>

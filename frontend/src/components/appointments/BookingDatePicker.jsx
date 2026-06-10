@@ -73,7 +73,7 @@ export default function BookingDatePicker({ value, onChange }) {
         <button type="button" className="btn-secondary" onClick={() => changeMonth(-1)}>
           Prev
         </button>
-        <h3 className="section-title booking-calendar-title">
+        <h3 className="calendar-month-label booking-calendar-title">
           {format(viewDate, "MMMM yyyy")}
         </h3>
         <button type="button" className="btn-secondary" onClick={() => changeMonth(1)}>

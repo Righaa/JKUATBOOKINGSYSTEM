@@ -21,5 +21,9 @@ namespace JkuatHospitalApi.Models
         public string Reason { get; set; } = string.Empty;
 
         public string Status { get; set; } = "Pending";
+
+        public string? RejectionReason { get; set; }
+
+        public DateTime? ReminderSentAt { get; set; }
     }
 }

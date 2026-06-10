@@ -94,6 +94,7 @@ namespace JkuatHospitalApi.Controllers
                 .Include(a => a.Doctor)
                 .Include(a => a.Patient)
                 .Where(a => a.PatientId == userId)
+                .OrderByDescending(a => a.AppointmentDate)
                 .ToListAsync();
 
             return Ok(appointments.Select(a => new
@@ -104,7 +105,8 @@ namespace JkuatHospitalApi.Controllers
                 patientName = a.Patient.Name,
                 appointmentDate = a.AppointmentDate,
                 status = a.Status,
-                reason = a.Reason
+                reason = a.Reason,
+                rejectionReason = a.RejectionReason
             }));
         }
 

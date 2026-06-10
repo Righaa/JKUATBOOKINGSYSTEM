@@ -77,7 +77,7 @@ export default function DoctorDashboard() {
             <button type="button" className="btn-secondary" onClick={() => changeMonth(-1)}>
               Prev
             </button>
-            <h2 className="section-title">{format(currentDate, "MMMM yyyy")}</h2>
+            <h2 className="calendar-month-label">{format(currentDate, "MMMM yyyy")}</h2>
             <button type="button" className="btn-secondary" onClick={() => changeMonth(1)}>
               Next
             </button>

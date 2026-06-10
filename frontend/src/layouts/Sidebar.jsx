@@ -28,6 +28,9 @@ export default function Sidebar() {
             <Link to="/admin/appointments" className={linkClass("/admin/appointments")}>
               Appointment Approvals
             </Link>
+            <Link to="/admin/profile" className={linkClass("/admin/profile")}>
+              Change Password
+            </Link>
           </>
         )}
 
@@ -44,6 +47,9 @@ export default function Sidebar() {
             </Link>
             <Link to="/doctor/calendar" className={linkClass("/doctor/calendar")}>
               Appointment Calendar
+            </Link>
+            <Link to="/doctor/profile" className={linkClass("/doctor/profile")}>
+              Change Password
             </Link>
           </>
         )}

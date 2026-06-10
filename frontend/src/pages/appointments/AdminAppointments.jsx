@@ -3,7 +3,10 @@ import {
   getAppointments,
   approveAppointment,
   rejectAppointment,
+  cancelAppointment,
+  completeAppointment,
 } from "../../services/AppointmentService";
+import RejectAppointmentModal from "../../components/appointments/RejectAppointmentModal";
 import connection from "../../realtime/SignalR";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../utils/getErrorMessage";
@@ -12,6 +15,8 @@ import { formatDoctorName } from "../../utils/formatDoctorName";
 export default function AdminAppointments() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejecting, setRejecting] = useState(false);
 
   const fetchAppointments = async () => {
     try {
@@ -32,11 +37,15 @@ export default function AdminAppointments() {
     connection.on("AppointmentCreated", fetchAppointments);
     connection.on("AppointmentApproved", fetchAppointments);
     connection.on("AppointmentRejected", fetchAppointments);
+    connection.on("AppointmentCancelled", fetchAppointments);
+    connection.on("AppointmentCompleted", fetchAppointments);
 
     return () => {
       connection.off("AppointmentCreated");
       connection.off("AppointmentApproved");
       connection.off("AppointmentRejected");
+      connection.off("AppointmentCancelled");
+      connection.off("AppointmentCompleted");
     };
   }, []);
 
@@ -44,21 +53,55 @@ export default function AdminAppointments() {
     try {
       await approveAppointment(id);
       toast.success("Appointment approved");
-      await connection.invoke("SendAppointmentApproved", { appointmentId: id });
       fetchAppointments();
     } catch (error) {
       toast.error(getErrorMessage(error, "Approval failed"));
     }
   };
 
-  const handleReject = async (id) => {
+  const openRejectModal = (appointment) => setRejectTarget(appointment);
+
+  const closeRejectModal = () => {
+    if (!rejecting) setRejectTarget(null);
+  };
+
+  const handleRejectConfirm = async (reason) => {
+    if (!rejectTarget) return;
+
+    setRejecting(true);
     try {
-      await rejectAppointment(id);
+      await rejectAppointment(rejectTarget.id, reason);
+      setAppointments((prev) => prev.filter((a) => a.id !== rejectTarget.id));
       toast.success("Appointment rejected");
-      await connection.invoke("SendAppointmentRejected", { appointmentId: id });
-      fetchAppointments();
+      setRejectTarget(null);
     } catch (error) {
       toast.error(getErrorMessage(error, "Rejection failed"));
+    } finally {
+      setRejecting(false);
+    }
+  };
+
+  const handleCancel = async (id) => {
+    if (!window.confirm("Cancel this appointment?")) return;
+
+    try {
+      await cancelAppointment(id);
+      toast.success("Appointment cancelled");
+      fetchAppointments();
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Could not cancel appointment"));
+    }
+  };
+
+  const handleComplete = async (id) => {
+    if (!window.confirm("Mark this appointment as completed?")) return;
+
+    try {
+      await completeAppointment(id);
+      toast.success("Appointment marked as completed");
+      fetchAppointments();
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Could not complete appointment"));
     }
   };
 
@@ -70,10 +113,14 @@ export default function AdminAppointments() {
         return "admin-status admin-status-rejected";
       case "Completed":
         return "admin-status admin-status-completed";
+      case "Cancelled":
+        return "admin-status admin-status-rejected";
       default:
         return "admin-status admin-status-pending";
     }
   };
+
+  const canCancel = (status) => status === "Pending" || status === "Approved";
 
   if (loading) {
     return (
@@ -85,6 +132,18 @@ export default function AdminAppointments() {
 
   return (
     <div className="admin-page">
+      <RejectAppointmentModal
+        isOpen={Boolean(rejectTarget)}
+        onClose={closeRejectModal}
+        onConfirm={handleRejectConfirm}
+        submitting={rejecting}
+        appointmentLabel={
+          rejectTarget
+            ? `${rejectTarget.patientName}'s request with ${formatDoctorName(rejectTarget.doctorName)}`
+            : ""
+        }
+      />
+
       {appointments.length === 0 ? (
         <div className="dashboard-card admin-empty-state">
           <p>No appointments available</p>
@@ -120,24 +179,46 @@ export default function AdminAppointments() {
                 </div>
               </dl>
 
-              {appointment.status === "Pending" && (
-                <div className="admin-form-actions admin-form-actions-split">
+              <div className="admin-form-actions admin-form-actions-split">
+                {appointment.status === "Pending" && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => openRejectModal(appointment)}
+                      className="btn-danger"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApprove(appointment.id)}
+                      className="btn-success"
+                    >
+                      Approve
+                    </button>
+                  </>
+                )}
+
+                {appointment.status === "Approved" && (
                   <button
                     type="button"
-                    onClick={() => handleReject(appointment.id)}
-                    className="btn-danger"
+                    onClick={() => handleComplete(appointment.id)}
+                    className="btn-sky"
                   >
-                    Reject
+                    Mark completed
                   </button>
+                )}
+
+                {canCancel(appointment.status) && (
                   <button
                     type="button"
-                    onClick={() => handleApprove(appointment.id)}
-                    className="btn-success"
+                    onClick={() => handleCancel(appointment.id)}
+                    className="btn-secondary"
                   >
-                    Approve
+                    Cancel
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </article>
           ))}
         </div>

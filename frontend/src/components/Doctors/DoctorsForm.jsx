@@ -26,12 +26,8 @@ export default function DoctorForm({ onSuccess }) {
     try {
       const res = await createDoctor(form);
       const doctorId = res.data?.doctorId ?? res.data?.doctor?.doctorId;
-      const defaultPassword = res.data?.defaultPassword ?? "Doctor@123";
-
       toast.success(
-        doctorId
-          ? `Doctor added. ID: ${doctorId}, default password: ${defaultPassword}`
-          : "Doctor added successfully",
+        doctorId ? `Doctor added. Doctor ID: ${doctorId}` : "Doctor added successfully",
         { autoClose: 8000 }
       );
       setForm(emptyForm);
@@ -48,8 +44,7 @@ export default function DoctorForm({ onSuccess }) {
       <section className="profile-section">
         <h2 className="profile-section-title">Add New Doctor</h2>
         <p className="admin-form-hint">
-          New doctors receive a Doctor ID after creation. Default password:{" "}
-          <strong>Doctor@123</strong>
+          New doctors receive a Doctor ID after creation. Share login credentials securely with the doctor.
         </p>
 
         <DoctorFormFields form={form} onChange={handleChange} idPrefix="add-" />
